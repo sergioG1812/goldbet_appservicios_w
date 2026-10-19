@@ -19,22 +19,28 @@ public class MatchesController : Controller
         _teamService = teamService;
     }
 
-    public async Task<IActionResult> Index(MatchStatus? status)
+    public async Task<IActionResult> Index(MatchStatus? status, string? search)
     {
+     
+        search = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
+
+       
         ViewBag.CurrentStatus = status;
-        var board = await _matchService.GetBoardAsync(status);
+        ViewBag.CurrentSearch = search;
+
+        var board = await _matchService.GetBoardAsync(status, search);
         return View(board);
     }
 
     public async Task<IActionResult> Detail(int id)
     {
         var match = await _matchService.GetDetailAsync(id);
-        if (match is null) return NotFound();
+        if (match is null) return NotFound(); 
 
         return View(match);
     }
 
-
+  
     [Authorize(Roles = DbSeeder.AdminRole)]
     public async Task<IActionResult> Create()
     {
@@ -58,7 +64,7 @@ public class MatchesController : Controller
             TempData["Success"] = "Partido creado correctamente.";
             return RedirectToAction(nameof(Index));
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException ex)  
         {
             ModelState.AddModelError(string.Empty, ex.Message);
             await LoadTeamsAsync();
@@ -77,7 +83,7 @@ public class MatchesController : Controller
         return View(dto);
     }
 
-   
+  
     [Authorize(Roles = DbSeeder.AdminRole)]
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(MatchFormDto dto)
