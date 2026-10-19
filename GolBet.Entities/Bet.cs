@@ -21,9 +21,10 @@ namespace GolBet.Entities
         public BetStatus Status { get; set; } = BetStatus.Pending;
 
         public int MatchId { get; set; }
-        // Navigation Property
+      
         public Match Match { get; set; } = null!;
 
-        // Módulo 7 añadirá: UserId + AppUser User
+        public string UserId { get; set; } = null!;  
+        public AppUser User { get; set; } = null!;  
     }
 }

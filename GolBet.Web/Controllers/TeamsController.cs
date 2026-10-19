@@ -1,9 +1,12 @@
-﻿using GolBet.Services.DTOs;
+﻿using GolBet.Repositories.Data;
+using GolBet.Services.DTOs;
 using GolBet.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GolBet.Web.Controllers;
 
+[Authorize(Roles = DbSeeder.AdminRole)]
 public class TeamsController : Controller
 {
     private readonly ITeamService _teamService;
@@ -15,7 +18,7 @@ public class TeamsController : Controller
     public async Task<IActionResult> Index()
         => View(await _teamService.GetAllAsync());
 
- 
+  
     public IActionResult Create() => View(new TeamFormDto());
 
    
@@ -26,8 +29,9 @@ public class TeamsController : Controller
 
         await _teamService.CreateAsync(dto);
         TempData["Success"] = $"Equipo «{dto.Name}» creado correctamente.";
-        return RedirectToAction(nameof(Index));  
+        return RedirectToAction(nameof(Index));
     }
+
 
     public async Task<IActionResult> Edit(int id)
     {
@@ -36,7 +40,7 @@ public class TeamsController : Controller
         return View(dto);
     }
 
- 
+
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(TeamFormDto dto)
     {
@@ -47,7 +51,6 @@ public class TeamsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-   
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Deactivate(int id)
     {
