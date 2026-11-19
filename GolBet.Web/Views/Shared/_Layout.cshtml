@@ -30,8 +30,14 @@
                                 <a class="nav-link" asp-controller="Teams" asp-action="Index">Equipos</a>
                             </li>
                         }
-						            <!-- Ya agregue lo de los partidos (Módulo 4) -->
+						           
 					</ul>
+					@if (User.IsInRole("Apostador"))
+					{
+					<li class="nav-item">
+						<a class="nav-link" asp-controller="Bets" asp-action="MyBets">Mis apuestas</a>
+					</li>
+					}
 					<partial name="_LoginPartial" />
 				</div>
 			</div>
@@ -45,9 +51,16 @@
                     ✅ @message
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            }
-            @RenderBody()
-        </main>
+			}
+			@if (TempData["Error"] is string errorMessage)
+			{
+			<div class="alert alert-danger alert-dismissible fade show">
+				⚠️ @errorMessage
+				<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+			</div>
+			}
+			@RenderBody()
+		</main>
     </div>
 
 	<footer class="border-top footer text-muted">

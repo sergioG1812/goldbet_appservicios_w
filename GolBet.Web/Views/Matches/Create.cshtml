@@ -6,4 +6,13 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+    $.validator.methods.number = function (value, element) {
+        return this.optional(element) || /^-?\d+([.,]\d+)?$/.test(value);
+    };
+    $.validator.methods.range = function (value, element, param) {
+        var n = parseFloat(String(value).replace(',', '.'));
+        return this.optional(element) || (n >= param[0] && n <= param[1]);
+    };
+</script>
 }
