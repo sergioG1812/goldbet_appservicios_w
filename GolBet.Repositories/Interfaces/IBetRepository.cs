@@ -7,4 +7,5 @@ public interface IBetRepository : IGenericRepository<Bet>
 {
     Task<bool> ExistsAsync(int matchId, string userId, BetPick pick);
     Task<IEnumerable<Bet>> GetByUserAsync(string userId);
+    Task<List<Bet>> GetPendingByMatchAsync(int matchId);
 }
