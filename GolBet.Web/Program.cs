@@ -9,12 +9,16 @@ using GolBet.Services.Mapping;
 using GolBet.Web.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var culture = new CultureInfo("es-CO");
 CultureInfo.DefaultThreadCurrentCulture = culture;
 CultureInfo.DefaultThreadCurrentUICulture = culture;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, config) =>
+    config.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddControllersWithViews(options =>
 {
@@ -23,7 +27,6 @@ builder.Services.AddControllersWithViews(options =>
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
@@ -41,11 +44,9 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
-
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IBetRepository, BetRepository>();
-
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<IMatchService, MatchService>();
@@ -53,6 +54,15 @@ builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IBetService, BetService>();
 
 var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error/General");
+    app.UseHsts();
+}
+
+
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
 
 using (var scope = app.Services.CreateScope())
@@ -63,19 +73,13 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedAsync(context, roleManager, userManager);
 }
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseSerilogRequestLogging();
 app.UseRouting();
 
-app.UseAuthentication();   
-app.UseAuthorization();   
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
